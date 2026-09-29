@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Caches
+.cache/
+hf_cache/
+.huggingface/
+wandb/
+
+# Trained adapters and smoke outputs
+outputs/
+_smoke/
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# Downloaded course assets (as in the course starter)
+cached/*
+!cached/README.md
+checkpoints/*
+!checkpoints/README.md
+manifests/*
+!manifests/README.md
+data/*
+!data/README.md
+!data/word_limit_prompts.jsonl
+
+# LaTeX build files
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Misc
+*.zip
+.DS_Store
