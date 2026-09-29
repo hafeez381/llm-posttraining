@@ -71,3 +71,8 @@ def normalize_advantages(advantages, mask, eps=1e-6):
     mean = valid.mean()
     std = valid.std(unbiased=False).clamp_min(eps)
     return ((advantages - mean) / std) * mask
+
+
+def clip_affected_fraction(ratio, advantage, mask, eps=0.2):
+    affected = ((advantage > 0) & (ratio > 1.0 + eps)) | ((advantage < 0) & (ratio < 1.0 - eps))
+    return masked_mean(affected.float(), mask)

@@ -2,7 +2,7 @@ import math
 
 import torch
 
-from task2_ppo.ppo import ppo_policy_loss
+from task2_ppo.ppo import clip_affected_fraction, ppo_policy_loss
 
 
 def test_ppo_clip_is_pessimistic_min():
@@ -21,3 +21,10 @@ def test_clipped_tokens_get_no_gradient_only_when_improving():
     loss, _, _ = ppo_policy_loss(new, torch.zeros(1, 2), torch.tensor([[1.0, -1.0]]), torch.ones(1, 2), eps=0.2)
     loss.backward()
     assert new.grad[0, 0].item() == 0.0 and new.grad[0, 1].item() != 0.0
+
+
+def test_affected_fraction_counts_only_gradient_removing_clips():
+    ratio = torch.tensor([[1.5, 1.5, 0.5, 0.5, 1.0]])
+    adv = torch.tensor([[1.0, -1.0, -1.0, 1.0, 1.0]])
+    mask = torch.ones(1, 5)
+    assert math.isclose(clip_affected_fraction(ratio, adv, mask).item(), 2 / 5, rel_tol=1e-6)
