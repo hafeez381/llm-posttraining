@@ -19,6 +19,22 @@ def group_relative_advantages(rewards: torch.Tensor, group_ids: torch.Tensor, ep
     return adv
 
 
+def group_stats(rewards: torch.Tensor, group_ids: torch.Tensor, tol: float = 1e-6) -> list[dict]:
+    out = []
+    for g in dict.fromkeys(group_ids.tolist()):
+        r = rewards[group_ids == g].double()
+        std = r.std(unbiased=False)
+        out.append({
+            "group": g,
+            "mean": float(r.mean()),
+            "std": float(std),
+            "informative": bool(std >= tol),
+            "informative_isclose": not bool(torch.isclose(std, torch.zeros_like(std))),
+            "centered": (r - r.mean()).tolist(),
+        })
+    return out
+
+
 def grpo_policy_loss(
     new_logp,
     old_logp,
