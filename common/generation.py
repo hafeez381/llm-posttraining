@@ -31,13 +31,20 @@ def batch_generate(
         tokenizer.apply_chat_template(p, tokenize=False, add_generation_prompt=True)
         for p in prompts
     ]
-    enc = tokenizer(
-        rendered,
-        return_tensors="pt",
-        padding=True,
-        truncation=True,
-        max_length=max_prompt_length,
-    )
+    # Keep the last max_prompt_length tokens: right truncation would cut the
+    # "<|im_start|>assistant\n" header and the model would continue the user turn.
+    side = tokenizer.truncation_side
+    tokenizer.truncation_side = "left"
+    try:
+        enc = tokenizer(
+            rendered,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=max_prompt_length,
+        )
+    finally:
+        tokenizer.truncation_side = side
     device = next(model.parameters()).device
     enc = {k: v.to(device) for k, v in enc.items()}
 
