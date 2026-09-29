@@ -91,7 +91,9 @@ def batch_generate(
     }
 
 
-def response_token_logprobs(model, sequences, attention_mask, prompt_width, response_ids):
+def response_token_logprobs(model, sequences, attention_mask, prompt_width, response_ids, temperature: float = 1.0):
+    """Log-probs of the response tokens. `temperature` divides the logits so the log-probs describe the
+    distribution the tokens were sampled from."""
     outputs = model(
         input_ids=sequences,
         attention_mask=attention_mask,
@@ -100,7 +102,7 @@ def response_token_logprobs(model, sequences, attention_mask, prompt_width, resp
     )
     logits = outputs.logits[:, prompt_width - 1 : -1, :]
     logits = logits[:, : response_ids.shape[1], :]
-    logp = F.log_softmax(logits.float(), dim=-1)
+    logp = F.log_softmax(logits.float() / temperature, dim=-1)
     chosen = torch.gather(logp, -1, response_ids.unsqueeze(-1)).squeeze(-1)
     return chosen, logits
 
