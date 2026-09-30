@@ -13,3 +13,8 @@ max_grad_norm: 1.0
 standard_output: outputs/task1_dpo/standard
 length_output: outputs/task1_dpo/length_balanced
 results_dir: results/task1_dpo
+eval_max_prompt_length: 512
+eval_batch_size: 16
+reward_max_length: 1280
+word_limit_samples: 5
+snapshot_every_steps: 10
