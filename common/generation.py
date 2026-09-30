@@ -136,12 +136,17 @@ def score_reward_pairs(rm_model, rm_tokenizer, prompts, responses, max_length=10
         )
 
     device = next(rm_model.parameters()).device
-    enc = rm_tokenizer(
-        texts,
-        return_tensors="pt",
-        padding=True,
-        truncation=True,
-        max_length=max_length,
-    )
+    side = rm_tokenizer.truncation_side
+    rm_tokenizer.truncation_side = "left"
+    try:
+        enc = rm_tokenizer(
+            texts,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=max_length,
+        )
+    finally:
+        rm_tokenizer.truncation_side = side
     enc = {k: v.to(device) for k, v in enc.items()}
     return rm_model(**enc).logits[:, 0].float()
