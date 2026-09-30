@@ -41,3 +41,15 @@ def test_eval_mode_logprobs_are_exact_and_still_differentiable():
     assert torch.equal(ratio, torch.ones_like(ratio))
     new.sum().backward()
     assert any(p.grad is not None and p.grad.abs().sum() > 0 for n, p in model.named_parameters() if "lora_" in n)
+
+
+def test_disable_dropout_survives_train_mode_and_checkpointing():
+    from common.rl_utils import disable_dropout
+    model = disable_dropout(_lora_model_in_train_mode())
+    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    model.eval()
+    model.train()
+    seq = torch.randint(0, 1000, (2, 16))
+    first = _logp(model, seq)
+    assert torch.equal(first, _logp(model, seq))
+    first.sum().backward()

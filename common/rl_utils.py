@@ -22,6 +22,13 @@ def logprobs_eval_mode(model):
             model.train()
 
 
+
+def disable_dropout(model):
+    for m in model.modules():
+        if isinstance(m, torch.nn.Dropout):
+            m.p = 0.0
+    return model
+
 def seq_kl(policy_logp: torch.Tensor, ref_logp: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
     """Per-sequence sampled KL estimate: sum over response tokens of log pi - log pi_ref (the k1 estimator)."""
     return ((policy_logp - ref_logp) * mask).sum(-1)
