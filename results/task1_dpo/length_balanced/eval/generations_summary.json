@@ -1,0 +1,131 @@
+{
+  "git_sha": "616d5c43ee60fac3534a52340957fae4917a6e5d",
+  "git_dirty": false,
+  "mode": "full",
+  "seed": 6304,
+  "command": "python -m task1_dpo.evaluate --mode full --adapter outputs/task1_dpo/length_balanced --name length_balanced --budget 1500 pairs, 94 steps (one epoch)",
+  "started_at": "2026-09-30T19:26:11+00:00",
+  "config": {
+    "seed": 6304,
+    "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+    "reward_model": "yavuz-ai/qwen2.5-1.5b-rm-ultrafeedback",
+    "reward_tokenizer": "Qwen/Qwen2.5-1.5B-Instruct",
+    "ai_judge_model": "Qwen/Qwen2.5-3B-Instruct",
+    "value_model_init": "Qwen/Qwen2.5-0.5B-Instruct",
+    "dtype": "float16",
+    "quantize_frozen_models": true,
+    "lora": {
+      "r": 8,
+      "alpha": 16,
+      "dropout": 0.05,
+      "target_modules": [
+        "q_proj",
+        "v_proj"
+      ]
+    },
+    "value_lora": {
+      "r": 8,
+      "alpha": 16,
+      "dropout": 0.05,
+      "target_modules": [
+        "q_proj",
+        "v_proj"
+      ]
+    },
+    "logprob_temperature": 1.0,
+    "generation": {
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "do_sample": true
+    },
+    "paths": {
+      "dpo_standard_train": "data/dpo_standard_train.jsonl",
+      "dpo_standard_eval": "data/dpo_standard_eval.jsonl",
+      "dpo_length_train": "data/dpo_length_balanced_train.jsonl",
+      "dpo_length_eval": "data/dpo_length_stratified_eval.jsonl",
+      "word_limit_prompts": "data/word_limit_prompts.jsonl",
+      "rl_prompt_train": "data/rl_prompt_pool_train.jsonl",
+      "rl_prompt_eval": "data/rl_prompt_pool_eval.jsonl",
+      "xstest": "data/xstest_safety_prompts.csv",
+      "gsm_train": "data/gsm8k_rl_train.jsonl",
+      "gsm_eval": "data/gsm8k_eval.jsonl",
+      "math_transfer_eval": "data/math_transfer_eval.jsonl",
+      "task5_diagnostics": "data/task5_controlled_reward_diagnostics.jsonl",
+      "ppo_rollout_cache": "cached/ppo_rollout.pt",
+      "grpo_k_cache": "cached/grpo_k_cache.jsonl",
+      "ppo_midpoint_policy": "checkpoints/ppo_midpoint_policy",
+      "ppo_midpoint_value": "checkpoints/ppo_midpoint_value",
+      "grpo_midpoint_policy": "checkpoints/grpo_midpoint_policy",
+      "rlvr_policy": "checkpoints/rlvr_policy",
+      "rlaif_policy": "checkpoints/rlaif_policy"
+    },
+    "beta": 0.1,
+    "betas": [
+      0.03,
+      0.1,
+      0.3
+    ],
+    "learning_rate": 2e-05,
+    "weight_decay": 0.0,
+    "batch_size": 2,
+    "grad_accum_steps": 8,
+    "epochs": 1,
+    "short_ablation_examples": 600,
+    "max_sequence_length": 768,
+    "max_generation_tokens": 256,
+    "max_grad_norm": 1.0,
+    "standard_output": "outputs/task1_dpo/standard",
+    "length_output": "outputs/task1_dpo/length_balanced",
+    "results_dir": "results/task1_dpo",
+    "eval_max_prompt_length": 512,
+    "eval_batch_size": 16,
+    "reward_max_length": 1280,
+    "word_limit_samples": 5,
+    "snapshot_every_steps": 10
+  },
+  "wall_clock_s": 454.98,
+  "peak_vram_gb": 8.028,
+  "rows": "results/task1_dpo/length_balanced/eval/generations.jsonl",
+  "n_rows": 300,
+  "name": "length_balanced",
+  "adapter": "outputs/task1_dpo/length_balanced",
+  "budget": "1500 pairs, 94 steps (one epoch)",
+  "beta": 0.1,
+  "logprob_temperature": 1.0,
+  "adapter_sha256": "9b57f8133e74bc183f240cf5a31de8218b150940bcb84ed917c5786c47de0303",
+  "n_prompts_truncated_at_512": 28,
+  "summary": {
+    "n": 300,
+    "rm_score": {
+      "mean": 1.3032190958658854,
+      "sd": 1.2398108043451361,
+      "q25": 0.47943115234375,
+      "q75": 2.330078125,
+      "iqr": 1.85064697265625,
+      "boot_se": 0.07272103201426336
+    },
+    "length": {
+      "mean": 157.45333333333335,
+      "sd": 107.41325109403802,
+      "q25": 36.75,
+      "q75": 256.0,
+      "iqr": 219.25,
+      "boot_se": 6.272873379005841
+    },
+    "kl_seq": {
+      "mean": 0.3578552077384666,
+      "sd": 0.520584882139777,
+      "q25": 0.017932423390448093,
+      "q75": 0.5651223361492157,
+      "iqr": 0.5471899127587676,
+      "boot_se": 0.029654545716845466
+    },
+    "kl_seq_mean": 0.3578552077384666,
+    "kl_tokmean": 0.0022727699703941904,
+    "entropy_sampled_tokmean": 0.7731262680708938,
+    "entropy_exact_tokmean": 0.949578597523838,
+    "eos_rate": 0.5366666666666666,
+    "truncation_rate": 0.4633333333333333,
+    "kl_convention": "kl_seq_mean: per-sequence sum of log pi - log pi_ref over response tokens, mean over prompts; kl_tokmean: pooled token mean over all response tokens (course sampled_kl helper)"
+  }
+}
