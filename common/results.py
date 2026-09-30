@@ -26,13 +26,17 @@ def git_sha() -> dict:
     return {"git_sha": sha_file.read_text().strip() if sha_file.exists() else "unknown", "git_dirty": False}
 
 
-def start_run(outdir: str | Path, *, mode: str, cfg: dict, seed: int) -> dict:
+def start_run(outdir: str | Path, *, mode: str, cfg: dict, seed: int, resume: bool = False) -> dict:
     """Empty `outdir` (only under results/ or outputs/) and return the run context with its stamp."""
     outdir = repo_path(outdir).resolve()
     if not any(outdir.is_relative_to(REPO_ROOT / r) and outdir != REPO_ROOT / r for r in WRITABLE_ROOTS):
         raise ValueError(f"Refusing to clear {outdir}: runs write only below results/ or outputs/")
-    shutil.rmtree(outdir, ignore_errors=True)
-    outdir.mkdir(parents=True)
+    if resume:
+        if not outdir.is_dir():
+            raise FileNotFoundError(f"Cannot resume: {outdir} does not exist")
+    else:
+        shutil.rmtree(outdir, ignore_errors=True)
+        outdir.mkdir(parents=True)
     if torch.cuda.is_available():
         torch.cuda.reset_peak_memory_stats()
     stamp = {
@@ -62,7 +66,8 @@ def _same(a, b, rel=1e-9) -> bool:
     return a == b
 
 
-def finalize(run: dict, rows_path: str | Path, summary: dict, summarize_fn, name: str = "summary.json") -> Path:
+def finalize(run: dict, rows_path: str | Path, summary: dict, summarize_fn, name: str = "summary.json",
+             extra: dict | None = None) -> Path:
     """Recompute the summary from the rows on disk, check it matches, and write it with the stamp."""
     rows_path = repo_path(rows_path)
     recomputed = summarize_fn(read_jsonl(rows_path))
@@ -75,6 +80,7 @@ def finalize(run: dict, rows_path: str | Path, summary: dict, summarize_fn, name
         "peak_vram_gb": round(torch.cuda.max_memory_allocated() / 2**30, 3) if torch.cuda.is_available() else None,
         "rows": str(rows_path.relative_to(REPO_ROOT)),
         "n_rows": len(read_jsonl(rows_path)),
+        **(extra or {}),
         "summary": summary,
     }
     out.write_text(json.dumps(record, indent=2, ensure_ascii=False), encoding="utf-8")
