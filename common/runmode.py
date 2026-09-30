@@ -35,6 +35,6 @@ def resolve_models(cfg: dict, mode: str) -> dict:
 
 def adapter_kwargs(cfg: dict, adapter_path: str | None) -> dict:
     """`load_policy` kwargs for a supplied adapter. Its shapes don't fit the tiny model, so smoke uses a fresh LoRA."""
-    if cfg.get("mode") == "smoke" and adapter_path:
+    if cfg.get("mode") == "smoke" and adapter_path and str(adapter_path).startswith("checkpoints/"):
         return {"adapter_path": None, "fresh_lora": True}
     return {"adapter_path": adapter_path}
