@@ -30,6 +30,7 @@ KL_CONVENTION = (
 )
 BOOTSTRAP_RESAMPLES = 1000
 BOOTSTRAP_SEED = 6304
+LOGPROB_CHUNK = 4
 
 
 @torch.no_grad()
@@ -45,15 +46,20 @@ def evaluate_policy(policy, tokenizer, rm, rm_tokenizer, prompts: list[dict], *,
         out = batch_generate(policy, tokenizer, [p["messages"] for p in batch], max_prompt_length, max_new_tokens,
                              temperature=generation["temperature"], top_p=generation["top_p"],
                              do_sample=generation["do_sample"])
-        args = (out["sequences"], out["attention_mask"], out["prompt_width"], out["response_ids"])
-        with logprobs_eval_mode(policy):
-            logp, logits = response_token_logprobs(policy, *args, temperature=logprob_temperature)
-            with reference_mode(policy):
-                ref_logp, _ = response_token_logprobs(policy, *args, temperature=logprob_temperature)
         mask = out["response_mask"]
-        kl = seq_kl(logp, ref_logp, mask)
-        ent_sampled = -(logp * mask).sum(-1)
-        ent_exact = exact_entropy(logits, mask, logprob_temperature)
+        kl, ent_sampled, ent_exact = [], [], []
+        for c in range(0, len(batch), LOGPROB_CHUNK):
+            sl = slice(c, c + LOGPROB_CHUNK)
+            args = (out["sequences"][sl], out["attention_mask"][sl], out["prompt_width"], out["response_ids"][sl])
+            with logprobs_eval_mode(policy):
+                logp, logits = response_token_logprobs(policy, *args, temperature=logprob_temperature)
+                ent_exact.append(exact_entropy(logits, mask[sl], logprob_temperature))
+                del logits
+                with reference_mode(policy):
+                    ref_logp, _ = response_token_logprobs(policy, *args, temperature=logprob_temperature)
+            kl.append(seq_kl(logp, ref_logp, mask[sl]))
+            ent_sampled.append(-(logp * mask[sl]).sum(-1))
+        kl, ent_sampled, ent_exact = torch.cat(kl), torch.cat(ent_sampled), torch.cat(ent_exact)
         # The RM sees the original, untruncated messages plus the response.
         rm_scores = score_reward_pairs(rm, rm_tokenizer, [p["messages"] for p in batch], out["responses"],
                                        max_length=reward_max_length)

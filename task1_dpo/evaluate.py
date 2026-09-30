@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 
 from common.data import load_yaml, prompt_messages_from_preference, read_jsonl, repo_path
-from common.eval_protocol import evaluate_policy, summarize as summarize_generations
+from common.eval_protocol import LOGPROB_CHUNK, evaluate_policy, summarize as summarize_generations
 from common.guards import assert_fixed_files, sha256_file
 from common.models import load_policy, load_reward_model, load_tokenizer
 from common.results import finalize, reconcile, start_run, write_rows
@@ -32,7 +32,9 @@ def score_pairs(model, tokenizer, rows, beta: float, max_length: int, batch_size
     for start in range(0, len(rows), batch_size):
         batch = rows[start:start + batch_size]
         chosen, rejected, meta = collate(batch)
-        pc, pr, rc, rr = pair_logprobs(model, chosen, rejected)
+        pc, pr, rc, rr = [torch.cat(t) for t in zip(*(
+            pair_logprobs(model, *[{k: v[c:c + LOGPROB_CHUNK] for k, v in d.items()} for d in (chosen, rejected)])
+            for c in range(0, len(batch), LOGPROB_CHUNK)))]
         margin = (pc - pr) - (rc - rr)
         loss = -F.logsigmoid(beta * margin)
         for i, row in enumerate(batch):
