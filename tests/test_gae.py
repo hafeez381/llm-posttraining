@@ -36,3 +36,10 @@ def test_whiten_masked():
     assert math.isclose(valid.mean().item(), 0.0, abs_tol=1e-6)
     assert math.isclose(valid.std(unbiased=False).item(), 1.0, rel_tol=1e-5)
     assert w[0, 3].item() == 0.0
+
+
+def test_shaped_rewards_without_kl_are_terminal_only():
+    logp = torch.tensor([[-1.0, -2.0, -3.0]])
+    ref = torch.tensor([[-1.5, -1.0, -3.5]])
+    r = shaped_rewards(torch.tensor([2.0]), logp, ref, torch.ones(1, 3), beta_kl=0.0)
+    torch.testing.assert_close(r, torch.tensor([[0.0, 0.0, 2.0]]))
