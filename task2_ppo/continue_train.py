@@ -50,7 +50,8 @@ def value_checkpoint(cfg: dict) -> str:
 
 
 def response_values(value_model, sequences, attention_mask, prompt_width: int, n: int, alignment: str):
-    backbone = getattr(value_model, value_model.base_model_prefix)
+    base = value_model.get_base_model() if hasattr(value_model, "get_base_model") else value_model
+    backbone = getattr(base, base.base_model_prefix)
     hidden = backbone(input_ids=sequences, attention_mask=attention_mask, output_hidden_states=True,
                       return_dict=True, use_cache=False).hidden_states[-1]
     start = {"prev": prompt_width - 1, "same": prompt_width}[alignment]
