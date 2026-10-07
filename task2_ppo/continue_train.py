@@ -58,6 +58,14 @@ def response_values(value_model, sequences, attention_mask, prompt_width: int, n
     return value_model.score(hidden.float()).squeeze(-1).float()
 
 
+def load_critic(cfg: dict):
+    value_model = disable_dropout(load_value_model(cfg, value_checkpoint(cfg),
+                                                   train_mode=cfg.get("value_train_mode", "head_only")))
+    for p in trainable_parameters(value_model):
+        p.data = p.data.float()
+    return value_model
+
+
 def prompt_sequence(cfg: dict, n: int) -> list[dict]:
     rows = read_jsonl(cfg["paths"]["rl_prompt_train"])
     order = np.random.default_rng(int(cfg["seed"])).permutation(len(rows))
@@ -73,13 +81,7 @@ def prepare_ppo_continuation(cfg: dict):
         trainable=True,
         **adapter_kwargs(cfg, cfg["paths"]["ppo_midpoint_policy"]),
     ))
-    value_model = disable_dropout(load_value_model(
-        cfg,
-        value_checkpoint(cfg),
-        train_mode=cfg.get("value_train_mode", "head_only"),
-    ))
-    for p in trainable_parameters(value_model):
-        p.data = p.data.float()
+    value_model = load_critic(cfg)
     reward_model, reward_tokenizer = load_reward_model(cfg)
 
     policy_optimizer = AdamW(
