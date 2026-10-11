@@ -16,3 +16,7 @@ output: outputs/task3_grpo/standard
 results_dir: results/task3_grpo
 group_cache: cached/grpo_k_cache.jsonl
 cache_generation_cap: 768
+reward_max_length: 1280
+eval_max_response_length: 768
+eval_batch_size: 16
+snapshot_every_updates: 2
