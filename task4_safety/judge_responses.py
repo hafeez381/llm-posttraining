@@ -8,8 +8,16 @@ from pathlib import Path
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
-from common.data import load_yaml, read_jsonl
+import sys
+
+from common.data import load_yaml, read_jsonl, repo_path
+from common.guards import assert_fixed_files
+from common.logging_utils import append_jsonl
 from common.models import resolve_dtype
+from common.results import finalize, reconcile, start_run
+from common.runmode import add_mode_arg, resolve_models
+
+PARSE_FAILURE_LIMIT = 0.05
 
 LABELS = {
     "SAFE_ANSWER",
@@ -102,20 +110,56 @@ def judge_one(tok, model, prompt, response, max_new_tokens=64):
     return parse_json(generated)
 
 
+def summarize(rows: list[dict]) -> dict:
+    out = {}
+    for p in dict.fromkeys(r["policy"] for r in rows):
+        sel = [r for r in rows if r["policy"] == p]
+        out[p] = {"n": len(sel), "parse_failure_rate": sum(r["rationale_tag"] == "parse_failure" for r in sel) / len(sel)}
+    return out
+
+
 def main():
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description="Label every generated XSTest response with the fixed AI judge")
+    add_mode_arg(ap)
     ap.add_argument("--config", default="configs/feedback.yaml")
-    ap.add_argument("--input", help="Optional generated JSONL file to inspect")
+    ap.add_argument("--resume", action="store_true")
     args = ap.parse_args()
-    cfg = load_yaml(args.config)
+    cfg = resolve_models(load_yaml(args.config), args.mode)
+    smoke = args.mode == "smoke"
+    assert_fixed_files(args.mode)
+    base = f"results/{'_smoke/' if smoke else ''}task4_safety"
+    rows = read_jsonl(f"{base}/generation/generated.jsonl")
+    run = start_run(f"{base}/judge", mode=args.mode, cfg=cfg, seed=int(cfg["seed"]),
+                    resume=args.resume and repo_path(f"{base}/judge").is_dir())
+    out_path = run["outdir"] / "judge.jsonl"
+    done = {(r["policy"], r["xstest_id"]) for r in read_jsonl(out_path)} if out_path.exists() else set()
+
     tok, model = load_judge(cfg)
-    print("Fixed Task 4 judge loaded:", cfg["ai_judge_model"])
-    if args.input:
-        rows = read_jsonl(args.input)
-        print("Input rows:", len(rows))
-    raise NotImplementedError(
-        "TODO(student): apply judge_one to your frozen-policy response files, cache the labels, and implement the required Task 4 aggregation."
-    )
+    raw = {}
+    parse = globals()["parse_json"]
+    def recording_parse(text):
+        raw["text"] = text
+        return parse(text)
+    globals()["parse_json"] = recording_parse
+    for i, r in enumerate(rows):
+        if (r["policy"], r["xstest_id"]) in done:
+            continue
+        verdict = judge_one(tok, model, r["prompt"], r["response"], int(cfg["judge_max_new_tokens"]))
+        append_jsonl(out_path, {"xstest_id": r["xstest_id"], "policy": r["policy"], **verdict, "raw": raw["text"]})
+        if i % 100 == 0:
+            print(f"judged {i + 1}/{len(rows)}", flush=True)
+
+    judged = read_jsonl(out_path)
+    summary = summarize(judged)
+    finalize(run, out_path, summary, summarize, extra={"judge_model": cfg["ai_judge_model"]})
+    reconcile(run["outdir"], {"judge.jsonl", "summary.json"})
+    ok = len(judged) == len(rows) and all(v["parse_failure_rate"] <= PARSE_FAILURE_LIMIT for v in summary.values())
+    for p, v in summary.items():
+        print(f"{p}: {v['n']} judged, parse failures {v['parse_failure_rate']:.3f}")
+    print(f"{'PASS' if ok else 'BREACH'}: every response judged, parse failures <= {PARSE_FAILURE_LIMIT} per policy "
+          "(labels are not shown until the manual audit is locked)")
+    if not ok and not smoke:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
