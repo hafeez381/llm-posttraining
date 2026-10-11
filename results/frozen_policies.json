@@ -1,0 +1,15 @@
+{
+  "sft": null,
+  "dpo": {
+    "path": "outputs/task1_dpo/standard",
+    "sha256": "49ecb945ee2223ad99d633a52ea3be4ab6ef2dc40e0f22a98d5036a45b39ecec"
+  },
+  "ppo": {
+    "path": "outputs/task2_ppo/standard",
+    "sha256": "7e478dcdfc0613b6310ab185a19cb7921d3252e9d1f81be1192f015d91c372ef"
+  },
+  "grpo": {
+    "path": "outputs/task3_grpo/standard",
+    "sha256": "df0a5caa27662f53e37b96fe945e807c22c3bcd97ab87162eb46c246f7382c6e"
+  }
+}
