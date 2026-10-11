@@ -19,7 +19,7 @@ WORD_LIMIT_PROMPTS = "data/word_limit_prompts.jsonl"
 WORD_LIMIT_BLOB = "9a0692f7c8e1b05c3a96104c70c46840dd45794e"
 FROZEN_POLICIES = "results/frozen_policies.json"
 STANDARD_POLICIES = {"sft", "dpo", "ppo", "grpo"}
-FORK_MARKERS = ("beta_", "eps_", "kl_", "dr_grpo", "length_balanced")
+FORK_MARKERS = ("beta_", "eps_", "kl_", "dr_grpo", "fork_", "length_balanced")
 FROZEN_PATHS = ["configs", "task1_dpo", "task2_ppo", "task3_grpo", "common"]
 
 
