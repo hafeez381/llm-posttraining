@@ -1,0 +1,20 @@
+\begin{tabular}{l c c c c c c}
+  \toprule
+  \textbf{Policy} & \textbf{Budget} & \textbf{RM} & \textbf{KL} & \textbf{Length (IQR)} & \textbf{Entropy} & \textbf{Max post-update KL} \\
+  \midrule
+    \multicolumn{7}{l}{\textit{PPO}} \\
+    Midpoint & -- & 1.719 & 0.003 & 287.1 (401) & 1.033 & -- \\
+    Standard & 20 upd. & 1.708 & -0.003 & 286.3 (403) & 1.038 & 5.0e-05 \\
+    $\epsilon = 0.05$ & 8 upd. & 1.722 & 0.001 & 287.7 (411) & 1.022 & 1.6e-05 \\
+    $\epsilon = 0.20$, $\beta_{\text{KL}} = 0.10$ & 8 upd. & 1.696 & 0.001 & 285.6 (400) & 1.029 & 1.9e-05 \\
+    $\epsilon = 0.50$ & 8 upd. & 1.754 & 0.000 & 288.3 (402) & 1.037 & 1.8e-05 \\
+    $\beta_{\text{KL}} = 0$ & 8 upd. & 1.728 & 0.008 & 285.4 (401) & 1.029 & 3.9e-05 \\
+    $\beta_{\text{KL}} = 0.20$ & 8 upd. & 1.753 & -0.006 & 289.4 (414) & 1.043 & 1.6e-05 \\
+    \midrule
+    \multicolumn{7}{l}{\textit{GRPO}} \\
+    Midpoint & -- & 1.685 & 0.003 & 285.0 (399) & 1.028 & -- \\
+    Standard & 20 upd. & 1.728 & 0.014 & 289.1 (430) & 1.024 & -- \\
+    Canonical ($1/T_k$) & 8 upd. & 1.713 & 0.014 & 290.2 (420) & 1.022 & -- \\
+    Dr.\ ($1/T_{\max}$) & 8 upd. & 1.759 & 0.019 & 288.0 (419) & 1.030 & -- \\
+  \bottomrule
+\end{tabular}

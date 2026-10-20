@@ -1,0 +1,11 @@
+\begin{tabular}{l cccc ccccc}
+  \toprule
+  & \multicolumn{4}{c}{\textbf{GSM8K}} & \multicolumn{5}{c}{\textbf{SVAMP}} \\
+  \cmidrule(lr){2-5}\cmidrule(lr){6-10}
+  \textbf{Policy} & Acc. & Format & Length & Win & Acc. & Format & Length & Win & Failures \\
+  \midrule
+    SFT & 0.283 & 0.35 & 274.3 & -- & 0.440 & 0.57 & 164.0 & -- & 13 / 40 / 3 / 0 \\
+    RLVR & 0.287 & 0.36 & 275.9 & 0.503 & 0.460 & 0.59 & 164.1 & 0.500 & 13 / 40 / 1 / 0 \\
+    RLAIF & 0.287 & 0.36 & 275.4 & 0.495 & 0.440 & 0.57 & 163.0 & 0.505 & 13 / 41 / 2 / 0 \\
+  \bottomrule
+\end{tabular}

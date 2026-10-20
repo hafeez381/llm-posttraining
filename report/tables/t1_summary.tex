@@ -1,0 +1,14 @@
+\begin{tabular}{l c c c c c c}
+  \toprule
+  \textbf{Model} & \textbf{Pairs/steps} & \textbf{Loss} & \textbf{Accuracy} & \textbf{KL} & \textbf{RM} & \textbf{Length (IQR)} \\
+  \midrule
+    SFT (reference) & -- & 0.6931 & 0.000 & 0.000 & 1.199 & 157.0 (221) \\
+    \midrule
+    Standard DPO & 1500/94 & 0.6764 & 0.627 & 0.010 & 1.233 & 158.6 (219) \\
+    Length-balanced DPO & 1500/94 & 0.6769 & 0.613 & 0.358 & 1.303 & 157.5 (219) \\
+    \midrule
+    $\beta = 0.03$ & 600/38 & 0.6912 & 0.633 & 0.017 & 1.222 & 156.9 (221) \\
+    $\beta = 0.10$ & 600/38 & 0.6879 & 0.577 & 0.021 & 1.237 & 155.9 (221) \\
+    $\beta = 0.30$ & 600/38 & 0.6804 & 0.603 & 0.014 & 1.207 & 156.3 (221) \\
+  \bottomrule
+\end{tabular}

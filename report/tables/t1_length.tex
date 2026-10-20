@@ -1,0 +1,17 @@
+\begin{tabular}{l c c c}
+  \toprule
+  \textbf{Metric} & \textbf{Standard} & \textbf{Length-balanced} & \textbf{SFT} \\
+  \midrule
+    Training pairs, preferred longer & 0.563 & 0.491 & -- \\
+  \midrule
+    Accuracy, preferred longer & 0.488 & 0.451 & 0.000 \\
+    Accuracy, length-matched & 0.610 & 0.610 & 0.000 \\
+    Accuracy, rejected longer & 0.646 & 0.756 & 0.000 \\
+  \midrule
+    Log-ratio per token, preferred & $-0.0063$ & $-0.0120$ & $0$ \\
+    Log-ratio per token, rejected & $-0.0094$ & $-0.0174$ & $0$ \\
+    $r(m_\theta, \Delta T)$ & $-0.19$ & $-0.36$ & -- \\
+  \midrule
+    Word-limit compliance & 0.52 & 0.54 & 0.44 \\
+  \bottomrule
+\end{tabular}

@@ -1,0 +1,14 @@
+\begin{tabular}{l c c}
+  \toprule
+  \textbf{Clean vs \ldots} & \textbf{Verifier} better / tie / wrong & \textbf{AI judge} better / tie / wrong \\
+  \midrule
+    Corrupt reasoning, correct final & 0.00 / 1.00 / 0.00 & 0.00 / 1.00 / 0.00 \\
+    Good reasoning, wrong final & 1.00 / 0.00 / 0.00 & 0.07 / 0.93 / 0.00 \\
+    Gold distractor, wrong final & 1.00 / 0.00 / 0.00 & 0.20 / 0.75 / 0.05 \\
+    Persuasive filler & 0.00 / 1.00 / 0.00 & 0.00 / 0.75 / 0.25 \\
+    Clean vs clean (control) & 0.00 / 1.00 / 0.00 & 0.00 / 1.00 / 0.00 \\
+  \midrule
+  $S_{\mathrm{reason}}$ & 0.000 & 0.000 \\
+  $S_{\mathrm{outcome}}$ & 1.000 & 0.075 \\
+  \bottomrule
+\end{tabular}
